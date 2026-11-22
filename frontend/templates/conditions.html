@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Conditions &amp; Analytics{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Conditions &amp; Analytics</h1>
+    <p>Live weather from the Open-Meteo REST/JSON API, stored condition observations, and charts computed from
+      PostgreSQL aggregate queries.</p>
+  </div>
+</div>
+
+<div class="kpis" id="kpis" aria-label="Record counts"></div>
+
+<div class="grid grid-2 mt-3">
+  <section class="card" aria-labelledby="live-h">
+    <div class="card-header"><div><h2 id="live-h">Fetch live route weather</h2>
+      <p>1&nbsp;Query segment coordinates → 2&nbsp;call Open-Meteo → 3&nbsp;INSERT observations → 4&nbsp;query stored results.</p></div></div>
+    <div class="card-body">
+      {% if current_user.user_role in ('admin', 'user') %}
+      <form id="live-form" class="filter-bar" novalidate>
+        <div class="field wide" data-field="route_id"><label for="live-route">Route</label><select id="live-route" name="route_id" required></select><span class="error"></span></div>
+        <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-accent" type="submit" id="live-btn">Fetch &amp; save weather</button></div>
+      </form>
+      <div id="live-result" class="mt-2">
+        <ol class="small muted" style="margin:0;padding-left:18px;line-height:1.8">
+          <li><b>Query 1</b> — <code>SELECT</code> the route's segments joined to start/end <code>location</code> coordinates.</li>
+          <li><b>External call</b> — <code>GET api.open-meteo.com/v1/forecast?current=…</code> for each segment midpoint (JSON).</li>
+          <li><b>Query 2</b> — <code>INSERT INTO condition_observation</code> (type <i>weather</i>, source <i>Open-Meteo</i>, mapped severity).</li>
+          <li><b>Query 3</b> — <code>SELECT</code> the stored Open-Meteo observations and the refreshed View 6 ranking.</li>
+        </ol>
+      </div>
+      {% else %}
+      <div class="notice"><span aria-hidden="true">🔒</span><div>Guests can view stored observations and charts. Sign in as a user to fetch and save live weather for your routes, or use “Weather” on the Places page for a display-only lookup.</div></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="sev-h">
+    <div class="card-header"><div><h2 id="sev-h">Condition severity distribution</h2><p><code>condition_observation</code> grouped by severity (0 = none, 5 = severe).</p></div></div>
+    <div class="card-body"><div class="chart-box"><canvas id="chart-severity" aria-label="Severity distribution chart"></canvas></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="mode-h">
+    <div class="card-header"><div><h2 id="mode-h">Average estimated travel time by mode</h2><p><code>route_option</code> grouped by <code>travel_mode</code>.</p></div></div>
+    <div class="card-body"><div class="chart-box"><canvas id="chart-mode" aria-label="Average duration by travel mode chart"></canvas></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="score-h">
+    <div class="card-header"><div><h2 id="score-h">Recommendation scores by trip</h2><p>Total route score per alternative from View 6.</p></div></div>
+    <div class="card-body"><div class="chart-box"><canvas id="chart-scores" aria-label="Route score chart"></canvas></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="type-h">
+    <div class="card-header"><div><h2 id="type-h">Observations by condition type</h2><p>Count and average severity per type.</p></div></div>
+    <div class="card-body"><div class="chart-box"><canvas id="chart-types" aria-label="Condition type chart"></canvas></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="rating-h">
+    <div class="card-header"><div><h2 id="rating-h">Feedback rating distribution</h2><p id="rating-sub"><code>feedback</code> grouped by rating.</p></div></div>
+    <div class="card-body"><div class="chart-box"><canvas id="chart-ratings" aria-label="Feedback ratings chart"></canvas></div></div>
+  </section>
+</div>
+
+<section class="card mt-3" aria-labelledby="obs-h">
+  <div class="card-header">
+    <div><h2 id="obs-h">Stored condition observations</h2><p id="obs-count" class="small"></p></div>
+    <div class="btn-group">
+      <a class="btn btn-sm btn-secondary" id="obs-csv" href="#" download>Export CSV</a>
+      <a class="btn btn-sm btn-secondary" id="obs-pdf" href="#" download>Export PDF</a>
+    </div>
+  </div>
+  <div class="card-body" style="padding-bottom:10px">
+    <form id="obs-filters" class="filter-bar" role="search">
+      <div class="field wide"><label for="of-q">Keyword</label><input id="of-q" name="q" type="search" placeholder="Description, road or source"></div>
+      <div class="field"><label for="of-type">Type</label><select id="of-type" name="type"><option value="">Any</option><option>traffic</option><option>weather</option><option>closure</option><option>construction</option></select></div>
+      <div class="field"><label for="of-sev">Min. severity</label><select id="of-sev" name="min_severity"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="of-src">Source</label><input id="of-src" name="source" type="text" placeholder="e.g. Open-Meteo"></div>
+      <div class="field"><label for="of-trip">Trip ID</label><input id="of-trip" name="trip_id" type="number" min="1" step="1"></div>
+      <div class="field"><label for="of-from">From</label><input id="of-from" name="from" type="date"></div>
+      <div class="field"><label for="of-to">To</label><input id="of-to" name="to" type="date"></div>
+    </form>
+  </div>
+  <div id="obs-table"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script type="module" src="{{ url_for('static', filename='js/conditions.js') }}"></script>
+{% endblock %}

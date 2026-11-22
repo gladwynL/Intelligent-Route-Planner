@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Administration{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Administration</h1>
+    <p>Create, edit and delete records in all nine relations. Every change goes through the REST API, which validates
+      input and enforces the administrator role on the server; PostgreSQL constraints remain the final safeguard.</p>
+  </div>
+  <div class="row small muted" id="health"></div>
+</div>
+
+<section class="card">
+  <div class="tabs" role="tablist" id="admin-tabs" aria-label="Database tables"></div>
+  <div class="card-body" style="padding-bottom:10px">
+    <div class="row between">
+      <div><h2 id="mgr-title"></h2><p class="muted small" id="mgr-desc"></p></div>
+      <button class="btn btn-primary" id="mgr-add" type="button">+ Add record</button>
+    </div>
+    <form id="mgr-filters" class="filter-bar mt-2" role="search"></form>
+  </div>
+  <div id="mgr-table" aria-live="polite"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,48 @@
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+instance/
+
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- Generated databases / data ---
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+*.dump
+*.backup
+
+# --- Test & browser artifacts ---
+test-results/
+playwright-report/
+tests/artifacts/
+*.log
+
+# --- Course reference material (contains student information; kept local only) ---
+docs/phase2-reference/*.pdf
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.tmp
+~$*

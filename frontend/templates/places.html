@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Places{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Places</h1>
+    <p>Shared locations used as trip origins, destinations and segment endpoints, plus your own labelled and favourite places.
+      Check current weather at any location (live Open-Meteo request).</p>
+  </div>
+  {% if current_user.user_role in ('admin', 'user') %}
+  <button class="btn btn-primary" id="add-location-btn" type="button">+ Add location</button>
+  {% endif %}
+</div>
+
+<div class="grid grid-places" id="places-grid">
+  <section class="card" aria-labelledby="loc-h">
+    <div class="card-header"><div><h2 id="loc-h">Locations</h2><p id="loc-count" class="small"></p></div></div>
+    <div class="card-body" style="padding-bottom:10px">
+      <form id="loc-filters" class="filter-bar" role="search">
+        <div class="field wide"><label for="lf-q">Search</label><input id="lf-q" name="q" type="search" placeholder="Name, address or city"></div>
+        <div class="field"><label for="lf-type">Type</label>
+          <select id="lf-type" name="type"><option value="">Any</option><option>home</option><option>work</option><option>school</option><option>public</option><option>other</option></select></div>
+        <div class="field"><label for="lf-city">City</label><input id="lf-city" name="city" type="text" placeholder="e.g. Oshawa"></div>
+      </form>
+    </div>
+    <div id="loc-table"></div>
+  </section>
+
+  <div class="stack">
+    <section class="card" aria-labelledby="wx-h">
+      <div class="card-header"><div><h2 id="wx-h">Current weather</h2><p>Display-only lookup (not stored). Route weather on the Planner is saved.</p></div></div>
+      <div class="card-body" id="loc-weather"><p class="muted small">Choose “Weather” on a location to fetch current conditions.</p></div>
+    </section>
+
+    {% if current_user.user_role in ('admin', 'user') %}
+    <section class="card" aria-labelledby="saved-h">
+      <div class="card-header"><div><h2 id="saved-h">{{ 'All saved places' if current_user.user_role == 'admin' else 'My saved places' }}</h2><p>Favourites appear in View 8.</p></div>
+        <button class="btn btn-sm btn-primary" id="add-saved-btn" type="button">+ Save a place</button></div>
+      <div id="saved-list"></div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/places.js') }}"></script>
+{% endblock %}

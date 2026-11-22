@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Route Planner{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Route Planner</h1>
+    <p>Plan a trip, compare alternatives across travel modes, and see how the database ranks them using the
+      Phase II weighted method (time 45%, distance 25%, safety 15%, tolls 10%, preference 5%).</p>
+  </div>
+</div>
+
+<div class="notice info mb" style="margin-bottom:18px">
+  <span aria-hidden="true">ℹ</span>
+  <div>Route alternatives are <b>stored records</b> (seeded demonstration data or user entries) or clearly labelled
+    <b>estimates</b> (heuristic or OSRM). Weather-based severities are application-defined risk estimates.
+    This is a planning and comparison tool, not real-time turn-by-turn navigation.</div>
+</div>
+
+<div class="grid grid-planner">
+  <div class="stack">
+    {% if current_user.user_role in ('admin', 'user') %}
+    <section class="card" aria-labelledby="plan-title">
+      <div class="card-header"><div><h2 id="plan-title">Plan a new trip</h2><p>Choose stored locations; alternatives can be estimated automatically.</p></div></div>
+      <div class="card-body">
+        <div id="plan-alert"></div>
+        <form id="plan-form" novalidate>
+          <div class="form-grid" id="plan-fields"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Create trip</button>
+          </div>
+        </form>
+      </div>
+    </section>
+    {% else %}
+    <div class="notice"><span aria-hidden="true">🔒</span><div>Guests have read-only access. Sign in with a user account to plan trips, compare your routes and fetch live weather.</div></div>
+    {% endif %}
+
+    <section class="card" aria-labelledby="trips-title">
+      <div class="card-header">
+        <div><h2 id="trips-title">{{ 'All trips' if current_user.user_role == 'admin' else 'My trips' }}</h2><p id="trip-count" class="small"></p></div>
+        <div class="btn-group">
+          <a class="btn btn-sm btn-secondary" id="trips-csv" href="#" download>CSV</a>
+          <a class="btn btn-sm btn-secondary" id="trips-pdf" href="#" download>PDF</a>
+        </div>
+      </div>
+      <div class="card-body" style="padding-bottom:10px">
+        <form id="trip-filters" class="filter-bar" role="search">
+          <div class="field wide"><label for="tf-q">Search</label><input id="tf-q" name="q" type="search" placeholder="Origin, destination{{ ', traveller' if current_user.user_role == 'admin' }}"></div>
+          <div class="field"><label for="tf-status">Status</label>
+            <select id="tf-status" name="status"><option value="">Any</option><option>planned</option><option>completed</option><option>cancelled</option></select></div>
+          <div class="field"><label for="tf-mode">Mode</label>
+            <select id="tf-mode" name="mode"><option value="">Any</option><option>driving</option><option>transit</option><option>cycling</option><option>walking</option></select></div>
+          <div class="field"><label for="tf-id">Trip ID</label><input id="tf-id" name="trip_id" type="number" min="1" step="1"></div>
+          <div class="field"><label for="tf-from">Departing from</label><input id="tf-from" name="from" type="date"></div>
+          <div class="field"><label for="tf-to">Departing to</label><input id="tf-to" name="to" type="date"></div>
+        </form>
+      </div>
+      <div class="trip-list" id="trip-list" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <div id="trip-detail" class="stack" aria-live="polite"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script type="module" src="{{ url_for('static', filename='js/planner.js') }}"></script>
+{% endblock %}

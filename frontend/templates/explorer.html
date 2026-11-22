@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Database Explorer{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Database Explorer</h1>
+    <p>Run the ten PostgreSQL views from the Phase II design and display their results as HTML tables.
+      Search and filter on the server, sort columns, inspect the SQL and export the current result to CSV or PDF.</p>
+  </div>
+  <div class="row small muted" id="db-status"></div>
+</div>
+
+<div class="grid grid-explorer">
+  <nav class="card" aria-label="SQL views">
+    <div class="card-header"><div><h2>SQL views</h2><p id="view-access" class="small"></p></div></div>
+    <div class="view-list" id="view-list"></div>
+  </nav>
+
+  <section class="card" aria-labelledby="view-title" id="view-panel">
+    <div class="card-header">
+      <div>
+        <h2 id="view-title">Select a view</h2>
+        <p id="view-desc"></p>
+      </div>
+      <div class="btn-group">
+        <a class="btn btn-sm btn-secondary" id="export-csv" href="#" download data-testid="export-csv">Export CSV</a>
+        <a class="btn btn-sm btn-secondary" id="export-pdf" href="#" download data-testid="export-pdf">Export PDF</a>
+      </div>
+    </div>
+    <div class="card-body" style="padding-bottom:12px">
+      <form id="view-filters" class="filter-bar" role="search" novalidate></form>
+      <div id="scope-note"></div>
+      <details class="sql" id="sql-box"><summary>Show SQL definition (from PostgreSQL <code>pg_get_viewdef</code>)</summary><pre id="sql-text"></pre></details>
+    </div>
+    <div id="view-table" aria-live="polite"></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/explorer.js') }}"></script>
+{% endblock %}

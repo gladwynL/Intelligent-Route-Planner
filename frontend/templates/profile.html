@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Profile</h1>
+    <p>Your routing preferences feed the 5% preference-match component of every route recommendation.
+      Manage the feedback you have left on your trips.</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="align-items:start">
+  <section class="card" aria-labelledby="pref-h">
+    <div class="card-header"><div><h2 id="pref-h">Routing preferences</h2><p>Stored in <code>user_preference</code> (one profile per user).</p></div></div>
+    <div class="card-body">
+      <div id="pref-alert"></div>
+      <form id="pref-form" novalidate>
+        <div class="form-grid" id="pref-fields"></div>
+        <div class="form-actions"><button class="btn btn-primary" type="submit">Save preferences</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="acct-h">
+    <div class="card-header"><div><h2 id="acct-h">Account</h2><p>Signed in with a PostgreSQL-backed account.</p></div></div>
+    <div class="card-body">
+      <dl class="stack" style="gap:8px;margin:0">
+        <div><dt class="muted small">Name</dt><dd style="margin:0;font-weight:600">{{ current_user.full_name }}</dd></div>
+        <div><dt class="muted small">Email</dt><dd style="margin:0">{{ current_user.email }}</dd></div>
+        <div><dt class="muted small">Role</dt><dd style="margin:0"><span class="badge role-{{ current_user.user_role }}">{{ current_user.user_role }}</span></dd></div>
+      </dl>
+      <p class="faint small mt-2">Passwords are stored only as salted scrypt hashes. Contact an administrator to change your role or reset your password.</p>
+    </div>
+  </section>
+</div>
+
+<section class="card mt-3" aria-labelledby="fb-h">
+  <div class="card-header"><div><h2 id="fb-h">My feedback</h2><p id="fb-count" class="small"></p></div>
+    <button class="btn btn-sm btn-primary" id="fb-add" type="button">+ Add feedback</button></div>
+  <div class="card-body" style="padding-bottom:10px">
+    <form id="fb-filters" class="filter-bar" role="search">
+      <div class="field wide"><label for="ff-q">Keyword</label><input id="ff-q" name="q" type="search" placeholder="Search comments"></div>
+      <div class="field"><label for="ff-rating">Rating</label><select id="ff-rating" name="rating"><option value="">Any</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      <div class="field"><label for="ff-trip">Trip ID</label><input id="ff-trip" name="trip_id" type="number" min="1" step="1"></div>
+    </form>
+  </div>
+  <div id="fb-table"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Intelligent Route Planner{% endblock %} · Route Planner</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f5fa8'/><path d='M9 23c4-10 10-4 14-14' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/><circle cx='9' cy='23' r='3' fill='%230f9d8a'/><circle cx='23' cy='9' r='3' fill='white'/></svg>">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body data-page="{{ page|default('') }}">
+{% set role = current_user.user_role if current_user else None %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{{ url_for('pages.planner') }}">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 19c3-8 8-3 14-14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="5" cy="19" r="2.4" fill="#fff"/><circle cx="19" cy="5" r="2.4" fill="#fff"/></svg>
+      </span>
+      <span>Route Planner<small>Intelligent Route Planning System</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <nav class="nav" aria-label="Main">
+      <a href="{{ url_for('pages.planner') }}" class="{{ 'active' if page == 'planner' }}">Planner</a>
+      <a href="{{ url_for('pages.places') }}" class="{{ 'active' if page == 'places' }}">Places</a>
+      <a href="{{ url_for('pages.explorer') }}" class="{{ 'active' if page == 'explorer' }}">Database Explorer</a>
+      <a href="{{ url_for('pages.conditions') }}" class="{{ 'active' if page == 'conditions' }}">Conditions &amp; Analytics</a>
+      {% if role in ('admin', 'user') %}
+      <a href="{{ url_for('pages.profile') }}" class="{{ 'active' if page == 'profile' }}">My Profile</a>
+      {% endif %}
+      {% if role == 'admin' %}
+      <a href="{{ url_for('pages.admin') }}" class="{{ 'active' if page == 'admin' }}">Admin</a>
+      {% endif %}
+    </nav>
+    <div class="user-chip">
+      <div class="who">{{ current_user.full_name }}<span>{{ current_user.email or 'Read-only access' }}</span></div>
+      <span class="badge role-{{ role }}" data-testid="role-badge">{{ role }}</span>
+      <button id="logout-btn" class="btn btn-sm btn-secondary" type="button">Log out</button>
+    </div>
+  </div>
+</header>
+<main class="page" id="main">
+  {% block content %}{% endblock %}
+</main>
+<script>window.APP_USER = {{ current_user|tojson }};</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

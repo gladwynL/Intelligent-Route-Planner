@@ -1,0 +1,24 @@
+# Optional: local PostgreSQL 16 for development and testing.
+# Usage:  docker compose up -d
+# Credentials below are local-development defaults only; override them in .env.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: route-planner-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-route_planner}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-route_planner_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-route_planner}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - route_planner_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-route_planner} -d ${POSTGRES_DB:-route_planner}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  route_planner_pgdata:
