@@ -142,7 +142,29 @@ mocks in the file.
 **No change was made to any Phase II CREATE TABLE structure or view body.** The only additions are five
 non-unique foreign-key indexes (for performance only) and the sequence reset.
 
-## 7. Known limitations
+## 7. Screenshot evidence run
+
+`scripts/capture_screenshots.py` (Playwright, Chromium 1440×900 plus a 390×844 mobile viewport) ran against
+the live app and a freshly seeded database. It saved 28 screenshots and 2 export files to `docs/screenshots/`
+and reported **no browser console errors**.
+
+## 8. Fresh-clone installation check (README verification)
+
+The repository was cloned into an empty folder and set up only with the documented script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -SkipDocker
+```
+
+(Here `DATABASE_URL` pointed at a throwaway database `route_planner_clonecheck`, so the demo data was not
+affected. The Docker path, `docker compose up -d`, is the one used throughout development.) Results:
+`.venv` was created, dependencies installed, `.env` generated with a random `SECRET_KEY`, the database
+created, and verification printed **PASS**. Starting `run.py` from the clone then served
+`GET /api/health` → `{"status":"ok", "server_version":"16.15", "table_count":9, "view_count":10}`, the user
+login returned 200, `GET /api/views/v6` returned 12 rows, and `/planner` returned 200. The throwaway database
+was dropped afterwards.
+
+## 9. Known limitations
 
 * Seeded route alternatives are demonstration data, and generated alternatives are estimates: OSRM covers
   driving only, and the other modes use a labelled straight-line heuristic. This is not live navigation and

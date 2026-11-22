@@ -46,3 +46,6 @@ desktop.ini
 *.swp
 *.tmp
 ~$*
+
+# --- Local tool settings ---
+.claude/
