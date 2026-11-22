@@ -1,0 +1,9 @@
+# Normalise text line endings; never touch binary files.
+* text=auto
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.sql text eol=lf
