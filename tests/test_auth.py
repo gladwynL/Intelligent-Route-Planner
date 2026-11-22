@@ -60,6 +60,16 @@ def test_session_cookie_flags(client):
     assert "HttpOnly" in cookie and "SameSite=Lax" in cookie
 
 
+def test_security_headers(client):
+    for url in ["/login", "/api/health"]:
+        h = client.get(url).headers
+        # Origin-only Referer on cross-site requests (needed by OpenStreetMap tile servers).
+        assert h["Referrer-Policy"] == "strict-origin-when-cross-origin"
+        assert h["X-Content-Type-Options"] == "nosniff"
+        assert h["X-Frame-Options"] == "DENY"
+    assert client.get("/api/health").headers["Cache-Control"] == "no-store"
+
+
 def test_unauthenticated_api_returns_401(client):
     for url in ["/api/trips", "/api/locations", "/api/views", "/api/observations", "/api/analytics/summary"]:
         assert client.get(url).status_code == 401, url

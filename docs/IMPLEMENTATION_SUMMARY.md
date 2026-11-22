@@ -45,7 +45,7 @@ programming, scripting (JavaScript), JSON, and REST web services, including an e
 
 ## Testing outcomes
 
-* **185 automated tests, all passing** (pytest 9.2): 48 database, 36 auth/authorisation, 40 CRUD and
+* **186 automated tests, all passing** (pytest 9.2): 48 database, 37 auth/authorisation/security headers, 40 CRUD and
   validation, 25 views/exports, 23 integration/error handling (including one live Open-Meteo call), and 13
   Playwright browser tests in headless Chromium.
 * View row counts on PostgreSQL match the Phase II appendix exactly (12, 4, 6, 8, 8, 12, 12, 4, 7, 6).

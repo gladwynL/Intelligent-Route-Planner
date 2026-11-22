@@ -63,7 +63,9 @@ def create_app(overrides: dict | None = None) -> Flask:
     def security_headers(resp):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("X-Frame-Options", "DENY")
-        resp.headers.setdefault("Referrer-Policy", "same-origin")
+        # strict-origin-when-cross-origin sends only the origin (no path/query) to other sites,
+        # which the OpenStreetMap tile servers require; "same-origin" sent no Referer and got tiles blocked.
+        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         if resp.mimetype == "application/json":
             resp.headers.setdefault("Cache-Control", "no-store")
         return resp

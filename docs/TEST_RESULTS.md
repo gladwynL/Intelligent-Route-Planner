@@ -26,17 +26,17 @@ python scripts\capture_screenshots.py     # evidence screenshots against the run
 
 ## 3. Automated test summary
 
-Final full run: `python -m pytest` → **185 passed, 0 failed, 0 skipped, 0 errors in 61.3 s**.
+Final full run: `python -m pytest` → **186 passed, 0 failed, 0 skipped, 0 errors in 71.0 s** (re-run after defect #10).
 
 | Suite | File | Tests | Result |
 |---|---|---|---|
 | Database (direct PostgreSQL) | `tests/test_database.py` | 48 | 48 passed |
-| Authentication & authorisation | `tests/test_auth.py` | 36 | 36 passed |
+| Authentication & authorisation | `tests/test_auth.py` | 37 | 37 passed |
 | CRUD, validation, ownership, filters | `tests/test_api_crud.py` | 40 | 40 passed |
 | SQL views, scoping, exports, analytics | `tests/test_views_exports.py` | 25 | 25 passed |
 | External API, routing, failure handling | `tests/test_weather.py` | 23 | 23 passed (incl. one **live** Open-Meteo call) |
 | Browser end-to-end (Playwright/Chromium) | `tests/e2e/test_browser.py` | 13 | 13 passed (run 3 more times on their own: 13/13 each time) |
-| **Total** | | **185** | **185 passed** |
+| **Total** | | **186** | **186 passed** |
 
 ### What the tests verify (highlights)
 
@@ -138,6 +138,7 @@ mocks in the file.
 | 7 | Visual review | The Leaflet map sometimes zoomed in too far when the card was still laying out. | `invalidateSize()` after layout and `maxZoom` on `fitBounds`. |
 | 8 | Full-suite run (browser test) | A race in `test_explorer_search_filter_sort_and_exports`: the assertion could run while the table showed its loading state. This was a problem in the test, not the app. | The test now waits until the filtered rows are rendered; it then passed in 3 separate runs plus the final full run. |
 | 9 | Git warning | An exported PDF was treated as text, so line-ending conversion could corrupt it on checkout. | Added `.gitattributes` marking PDF and PNG files as binary. |
+| 10 | User report: OpenStreetMap "Access blocked" tiles | `Referrer-Policy: same-origin` stopped the browser sending any Referer to `tile.openstreetmap.org`, which the OSM tile usage policy requires. (Headless Chromium still received tiles, but with an empty Referer.) | Changed to `strict-origin-when-cross-origin`, which sends only the origin. Verified in Chromium: Referer `http://127.0.0.1:8050/`, 18/18 tile responses 200, 8 tiles drawn, both markers and the route line present, zoom works. Covered by `test_security_headers`; screenshot `15-map-tiles-fixed.png`. |
 
 **No change was made to any Phase II CREATE TABLE structure or view body.** The only additions are five
 non-unique foreign-key indexes (for performance only) and the sequence reset.

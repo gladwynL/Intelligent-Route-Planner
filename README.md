@@ -361,7 +361,7 @@ python scripts\render_diagrams.py
 * CSRF tokens (Flask-WTF) are required for every POST, PUT and DELETE, including login.
 * Authorisation happens on the server for every request, and the user's role is re-read from the database
   each time. Requests for another user's records return 404, so the API does not even reveal that they exist.
-* Responses set `X-Content-Type-Options`, `X-Frame-Options: DENY` and `Referrer-Policy`, and API JSON is `no-store`.
+* Responses set `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` and `Referrer-Policy: strict-origin-when-cross-origin` (other sites receive only the origin, which the OpenStreetMap tile servers require), and API JSON is `no-store`.
 * `run.py` uses Flask's built-in server, which is fine for a local demonstration. A production deployment
   would use a WSGI server (for example waitress or gunicorn) behind HTTPS.
 * The Phase II reference PDFs contain student information, so they are kept local only (`docs/phase2-reference/*.pdf` is git-ignored).
