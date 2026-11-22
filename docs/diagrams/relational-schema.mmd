@@ -1,0 +1,97 @@
+erDiagram
+    app_user ||--o| user_preference : "has"
+    app_user ||--o{ trip : "requests"
+    app_user ||--o{ saved_location : "creates"
+    app_user ||--o{ feedback : "submits"
+    location ||--o{ trip : "origin_for"
+    location ||--o{ trip : "destination_for"
+    location ||--o{ saved_location : "is_saved_in"
+    location ||--o{ route_segment : "start_for"
+    location ||--o{ route_segment : "end_for"
+    trip ||--o{ route_option : "offers"
+    trip ||--o{ feedback : "receives"
+    route_option ||--o{ route_segment : "contains"
+    route_segment ||--o{ condition_observation : "receives"
+
+    app_user {
+        int user_id PK
+        varchar full_name
+        varchar email UK
+        varchar password_hash
+        varchar user_role "admin|user|guest"
+        timestamp created_at
+    }
+    location {
+        int location_id PK
+        varchar location_name
+        varchar street_address
+        varchar city
+        numeric latitude "UK with longitude"
+        numeric longitude
+        varchar location_type
+    }
+    user_preference {
+        int preference_id PK
+        int user_id FK,UK
+        varchar preferred_mode
+        numeric max_walking_km
+        boolean avoid_tolls
+        boolean avoid_highways
+        boolean prioritize_safety
+    }
+    trip {
+        int trip_id PK
+        int user_id FK
+        int origin_location_id FK
+        int destination_location_id FK
+        timestamp requested_at
+        timestamp departure_time
+        varchar trip_status
+        int actual_duration_min
+    }
+    route_option {
+        int route_id PK
+        int trip_id FK
+        int option_number "UK with trip_id"
+        varchar travel_mode
+        numeric distance_km
+        int estimated_duration_min
+        numeric toll_cost
+        boolean is_selected "one per trip"
+        timestamp generated_at
+    }
+    route_segment {
+        int segment_id PK
+        int route_id FK
+        int sequence_no "UK with route_id"
+        int start_location_id FK
+        int end_location_id FK
+        varchar road_name
+        numeric distance_km
+        int estimated_duration_min
+    }
+    condition_observation {
+        int observation_id PK
+        int segment_id FK
+        timestamp observed_at
+        varchar condition_type
+        int severity "0-5"
+        varchar description
+        varchar source_name
+    }
+    saved_location {
+        int saved_location_id PK
+        int user_id FK
+        int location_id FK
+        varchar label
+        boolean is_favourite
+        timestamp saved_at
+    }
+    feedback {
+        int feedback_id PK
+        int user_id FK
+        int trip_id FK
+        int rating "1-5"
+        varchar comments
+        timestamp submitted_at
+    }

@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    actor U as User (browser)
+    participant F as Flask API<br/>POST /api/weather/routes/{id}
+    participant D as PostgreSQL
+    participant O as Open-Meteo API
+
+    U->>F: fetch() with session cookie + X-CSRFToken
+    F->>F: role check (admin/user) and route ownership
+    F->>D: Query 1 — SELECT segments JOIN location (start/end coordinates)
+    D-->>F: segment midpoints
+    loop each distinct segment midpoint
+        F->>O: GET /v1/forecast?latitude&longitude&current=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m
+        O-->>F: JSON {current: {...}}
+        F->>F: parse JSON, map WMO code + wind + cold to severity 0–5 (app-defined estimate)
+    end
+    F->>D: Query 2 — INSERT INTO condition_observation (weather, severity, description, 'Open-Meteo')
+    F->>D: Query 3 — SELECT stored Open-Meteo observations for the route
+    F->>D: SELECT refreshed ranking from v6_ranked_route_recommendations
+    D-->>F: rows
+    F-->>U: 201 JSON (weather, inserted IDs, stored observations, updated scores)
+    Note over F,O: Network/HTTP/format errors → 502 JSON error, nothing is stored

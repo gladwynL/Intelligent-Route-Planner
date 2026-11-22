@@ -91,7 +91,7 @@ def estimate_alternatives(origin: dict, dest: dict, modes=None) -> list[RouteEst
     """Return estimates for each requested mode (skipping unrealistic walk/cycle lengths)."""
     straight = haversine_km(origin["latitude"], origin["longitude"], dest["latitude"], dest["longitude"])
     out: list[RouteEstimate] = []
-    for mode in modes or MODE_PROFILES:
+    for mode in (MODE_PROFILES if modes is None else modes):  # [] means "no modes", not "all"
         if mode == "driving":
             est = osrm_driving(origin, dest) or heuristic("driving", straight)
         else:

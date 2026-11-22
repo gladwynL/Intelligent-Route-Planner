@@ -1,0 +1,23 @@
+flowchart TB
+    UI["<b>Frontend — web browser</b><br/>HTML5 · CSS3 · vanilla JavaScript (ES modules)<br/>Pages: Login · Route Planner · Places · Database Explorer ·<br/>Conditions &amp; Analytics · Profile · Admin<br/>Fetch API (AJAX) · Chart.js charts · Leaflet map · JS form validation"]
+
+    subgraph FLASK["Flask application — Python 3.12"]
+        direction LR
+        AUTH["<b>auth.py</b><br/>session login / logout<br/>admin · user · guest roles<br/>scrypt password hashes<br/>CSRF protection"]
+        API["<b>REST/JSON API  /api/*</b><br/>GET · POST · PUT · DELETE<br/>trips · routes · segments · locations<br/>users · preferences · saved places<br/>feedback · observations · views<br/>export · analytics · health"]
+        SVC["<b>services/</b><br/>weather.py (Open-Meteo client,<br/>severity mapping)<br/>routing.py (OSRM / heuristic)<br/>exporter.py (CSV · PDF)"]
+        DBL["<b>db.py · validation.py · errors.py</b><br/>SQLAlchemy Core, bound parameters<br/>server-side input validation<br/>SQLSTATE → HTTP error mapping"]
+        AUTH --> API
+        API --> SVC
+        API --> DBL
+    end
+
+    PG[("<b>PostgreSQL 16</b><br/>9 relations · keys · CHECK / UNIQUE / FK constraints<br/>10 views — v6 weighted recommendation<br/>(time 45% · distance 25% · safety 15% · toll 10% · preference 5%)")]
+    OM(["<b>Open-Meteo</b><br/>external REST/JSON weather API"])
+    OSRM(["<b>OSRM demo server</b><br/>optional driving estimates"])
+
+    UI -- "HTTPS JSON requests<br/>(session cookie + X-CSRFToken)" --> AUTH
+    API -- "JSON responses · CSV/PDF downloads" --> UI
+    DBL -- "SQL via psycopg 3" --> PG
+    SVC -- "GET current weather (JSON)" --> OM
+    SVC -. "GET driving route (fallback: heuristic)" .-> OSRM
